@@ -1,0 +1,29 @@
+name: AI Snap Test via Workshop & OpenCode
+
+on: [workflow_dispatch]
+
+jobs:
+  ai-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dev/tests/agentic
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install LXD & Workshop
+        run: |
+          sudo snap install lxd
+          sudo lxd init --auto
+          sudo snap install workshop --classic
+
+      - name: Run OpenCode Testing Agent
+        env:
+          SNAP_NAME: smollm2
+          SNAP_CHANNEL: edge
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: deepseek/deepseek-v4-flash
+        run: ./run.sh
