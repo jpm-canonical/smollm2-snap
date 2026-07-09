@@ -14,11 +14,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install LXD & Workshop
-        run: |
-          sudo snap install lxd --channel=6/stable
-          sudo lxd init --auto
-          sudo snap install workshop --classic
+      - name: Launch Workshop
+        uses: canonical/launch-workshop@v1
+        with:
+          project: dev/tests/agentic
 
       - name: Run OpenCode Testing Agent
         env:
