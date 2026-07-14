@@ -26,3 +26,13 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_MODEL: deepseek/deepseek-v4-flash
         run: ./run.sh
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snap-test-reports
+          path: |
+            dev/tests/agentic/snap-test-report.json
+            dev/tests/agentic/snap-triage-report.json
+          if-no-files-found: warn
