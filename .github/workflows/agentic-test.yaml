@@ -3,6 +3,10 @@ name: AI Snap Test via Workshop & OpenCode
 on:
   workflow_dispatch:
     inputs:
+      snap_channel:
+        description: "Snap channel to test"
+        type: string
+        default: edge
       create_issues:
         description: "Automatically file GitHub issues for NEW findings in the tracker repo"
         type: boolean
@@ -10,38 +14,12 @@ on:
 
 jobs:
   ai-test:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: dev/tests/agentic
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Launch Workshop
-        uses: canonical/launch-workshop@v1
-        with:
-          project: dev/tests/agentic
-
-      - name: Run OpenCode Testing Agent
-        env:
-          SNAP_NAME: smollm2
-          SNAP_CHANNEL: edge
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          OPENROUTER_MODEL: deepseek/deepseek-v4-flash
-          CREATE_ISSUES: ${{ inputs.create_issues }}
-          ISSUE_REPO: canonical/inference-snaps
-          ISSUE_CREATE_TOKEN: ${{ secrets.ISSUE_CREATE_TOKEN }}
-        run: ./run.sh
-
-      - name: Upload test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: snap-test-reports
-          path: |
-            dev/tests/agentic/snap-test-report.json
-            dev/tests/agentic/snap-triage-report.json
-          if-no-files-found: warn
+    # TODO: target the main branch once the reusable workflow is merged.
+    uses: canonical/inference-snaps-dev/.github/workflows/reuse-agentic-test.yaml@agentic-test
+    with:
+      snap-name: smollm2
+      snap-channel: ${{ inputs.snap_channel }}
+      create-issues: ${{ inputs.create_issues }}
+    secrets:
+      openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}
+      issue-create-token: ${{ secrets.ISSUE_CREATE_TOKEN }}
