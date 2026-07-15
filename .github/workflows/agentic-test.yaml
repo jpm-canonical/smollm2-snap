@@ -1,6 +1,12 @@
 name: AI Snap Test via Workshop & OpenCode
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      create_issues:
+        description: "Automatically file GitHub issues for NEW findings in the tracker repo"
+        type: boolean
+        default: false
 
 jobs:
   ai-test:
@@ -25,6 +31,9 @@ jobs:
           SNAP_CHANNEL: edge
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_MODEL: deepseek/deepseek-v4-flash
+          CREATE_ISSUES: ${{ inputs.create_issues }}
+          ISSUE_REPO: canonical/inference-snaps
+          ISSUE_CREATE_TOKEN: ${{ secrets.ISSUE_CREATE_TOKEN }}
         run: ./run.sh
 
       - name: Upload test reports
