@@ -14,12 +14,14 @@ on:
 
 jobs:
   ai-test:
-    # TODO: target the main branch once the reusable workflow is merged.
-    uses: canonical/inference-snaps-dev/.github/workflows/reuse-agentic-test.yaml@agentic-test
-    with:
-      snap-name: smollm2
-      snap-channel: ${{ inputs.snap_channel }}
-      create-issues: ${{ inputs.create_issues }}
-    secrets:
-      openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}
-      issue-create-token: ${{ secrets.ISSUE_CREATE_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run agentic snap test
+        # TODO: target the main branch once the action is merged.
+        uses: canonical/inference-snaps-dev/.github/actions/agentic-test@agentic-test
+        with:
+          snap-name: smollm2
+          snap-channel: ${{ inputs.snap_channel }}
+          create-issues: ${{ inputs.create_issues }}
+          openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}
+          issue-create-token: ${{ secrets.ISSUE_CREATE_TOKEN }}
