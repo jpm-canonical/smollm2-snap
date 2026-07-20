@@ -1,4 +1,4 @@
-name: AI Snap Test via Workshop & OpenCode
+name: Agentic Snap Test
 
 on:
   workflow_dispatch:
@@ -16,8 +16,7 @@ jobs:
   ai-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Run agentic snap test
-        # TODO: target the main branch once the action is merged.
+      - name: Run test
         uses: canonical/inference-snaps-dev/.github/actions/agentic-test@agentic-test
         with:
           snap-name: smollm2
