@@ -1,0 +1,86 @@
+name: Renovate Pr Checks
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+jobs:
+  classify:
+    runs-on: ubuntu-slim
+    outputs:
+      needs-lab-tests: ${{ steps.marker.outputs.needs-lab-tests || 'false' }}
+    steps:
+      - name: Check whether PR was filed by Renovate
+        id: author
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const isRenovate = context.payload.pull_request.user.login === 'renovate[bot]';
+            core.setOutput('is-renovate', String(isRenovate));
+
+      - name: Check latest commit for lab test marker
+        id: marker
+        if: steps.author.outputs.is-renovate == 'true'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { data: commit } = await github.rest.repos.getCommit({
+              ...context.repo,
+              ref: context.payload.pull_request.head.sha,
+            });
+            const requested = /^lab-tests: true\r?$/m.test(commit.commit.message);
+            core.setOutput('needs-lab-tests', String(requested));
+
+      - name: Validate branch for lab tests
+        if: steps.marker.outputs.needs-lab-tests == 'true'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (pr.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
+              throw new Error('Renovate lab tests require a branch in this repository');
+            }
+
+  lab-tests:
+    needs: classify
+    if: needs.classify.outputs.needs-lab-tests == 'true'
+    uses: ./.github/workflows/pr-label.yaml
+    with:
+      trigger-label: trigger-tests
+    secrets: inherit
+
+  pr-checks:
+    name: Renovate PR Checks
+    if: ${{ always() }}
+    needs: [classify, lab-tests]
+    runs-on: ubuntu-slim
+    steps:
+      - name: Report required lab test result
+        uses: actions/github-script@v9
+        env:
+          CLASSIFY_RESULT: ${{ needs.classify.result }}
+          NEEDS_LAB_TESTS: ${{ needs.classify.outputs.needs-lab-tests }}
+          LAB_RESULT: ${{ needs.lab-tests.result }}
+        with:
+          script: |
+            if (process.env.CLASSIFY_RESULT !== 'success') {
+              core.setFailed('PR classification did not succeed');
+              return;
+            }
+            if (context.payload.pull_request.user.login !== 'renovate[bot]') {
+              return;
+            }
+            if (process.env.NEEDS_LAB_TESTS !== 'true') {
+              return;
+            }
+            if (process.env.LAB_RESULT !== 'success') {
+              core.setFailed(`Required lab tests did not succeed: ${process.env.LAB_RESULT}`);
+            }

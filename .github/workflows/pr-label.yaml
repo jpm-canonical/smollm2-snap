@@ -1,13 +1,19 @@
-# This workflow is triggered when a label is added to a pull request.
-# It runs the build/test workflow depending on the label applied to the PR.
+# Run build/test tasks from a PR label or a reusable workflow call.
 name: PR Label
 
 on:
   pull_request:
     types: [ labeled ]
+  workflow_call:
+    inputs:
+      trigger-label:
+        description: Build/test task to run
+        required: true
+        type: string
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  # Reusable calls must not cancel their caller's concurrency group.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}-pr-label
   cancel-in-progress: true
 
 permissions:
@@ -17,11 +23,10 @@ permissions:
 
 jobs:
   build-test:
-    # The applied label is used to select build/test tasks and as job's display name.
-    name: ${{ github.event.label.name }}
-    uses: canonical/inference-snaps-dev/.github/workflows/reuse-pr-build-test.yaml@v2
+    name: ${{ inputs.trigger-label || github.event.label.name }}
+    uses: canonical/inference-snaps-dev/.github/workflows/reuse-pr-build-test.yaml@label-ignore-fail
     with:
-      trigger-label: ${{ github.event.label.name }}
+      trigger-label: ${{ inputs.trigger-label || github.event.label.name }}
       pr-number: "${{ github.event.pull_request.number }}"
       build-runner: |
         [
