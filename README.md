@@ -60,6 +60,9 @@ Renovate PRs opt into lab testing with a standalone `lab-tests: true` line in
 the latest commit message (set `commitBody` in the relevant Renovate package
 rules). Tests run on PR creation, reopening, and updates.
 
+The local `renovate.json` adds this marker and enables PR automerge for
+llama.cpp and OpenVINO Model Server updates, without ignoring required checks.
+
 The `Renovate Pr Checks` workflow skips lab tests and passes for non-Renovate
 PRs and Renovate PRs without the marker. When the marker is present on a
 Renovate PR, the `Renovate PR Checks` check requires successful lab tests.

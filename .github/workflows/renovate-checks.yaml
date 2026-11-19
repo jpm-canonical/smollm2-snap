@@ -2,7 +2,6 @@ name: Renovate Pr Checks
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}

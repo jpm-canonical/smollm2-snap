@@ -2,5 +2,18 @@
   "extends": [
     "config:recommended",
     "github>canonical/inference-snaps-dev//renovate/default.jsonc#v2"
+  ],
+  "packageRules": [
+    {
+      "description": "Automerge runtime updates with lab tests",
+      "matchDepNames": [
+        "canonical/llama.cpp-builds",
+        "openvinotoolkit/model_server"
+      ],
+      "commitBody": "lab-tests: true",
+      "automerge": true,
+      "automergeType": "pr",
+      "ignoreTests": false
+    }
   ]
 }
