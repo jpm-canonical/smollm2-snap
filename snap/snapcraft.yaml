@@ -145,7 +145,7 @@ parts:
 
   intel-opencl-icd:
     source: https://github.com/canonical/intel-compute-runtime-bundle.git
-    source-tag: 26.22.38646.4
+    source-tag: 26.40.40196.8
     plugin: make
     make-parameters:
       - BUNDLE=intel-opencl-icd
@@ -272,7 +272,7 @@ parts:
 
   intel-compute-runtime:
     source: https://github.com/canonical/intel-compute-runtime-bundle.git
-    source-tag: 26.22.38646.4
+    source-tag: 26.40.40196.8
     plugin: make
     make-parameters:
       - BUNDLE=intel-compute-runtime
